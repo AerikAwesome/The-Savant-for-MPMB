@@ -50,7 +50,7 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 	],
 
 	weapons : [ //required; the 3 entries are for: ["simple", "martial", "other"]
-		[true, false, ["hand crossbow", "shortsword"]], //required; the weapon proficiencies if this is the first or only class
+		[true, false, ["hand crossbow", "scimitar", "shortsword", "rapiers", "whips"]], //required; the weapon proficiencies if this is the first or only class
 		[false, false, []] //required; the weapon proficiencies if this class is multiclassed with (so not taken at level 1, but later)
 	],
 
@@ -113,39 +113,38 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
             ]),
 		},
 
-		"unyielding mind" : {
-			name : "Unyielding Mind",
+		"intellect dice" : {
+			name : "Intellect Dice",
 			source : ["GMB:LL", 2],
 			minlevel : 2,
             description : desc([
 				"When I make an Intelligence, Wisdom, or Charisma check or saving throw,",
-				"I can use my reaction to roll a bonus die and add it to the result.",
+				"I can roll a bonus die and add it to the result.",
 				"Use this feature after you roll, but before you know whether you succeed or fail."
                 ]),
             additional : levels.map(function (n) {
-                return (n < 10 ? "1d6" : n < 15 ? "1d8": n < 20 ? "1d10" : "1d12")
+                return (n < 5 ? "1d4" : n < 10 ? "1d6" : n < 15 ? "1d8": n < 20 ? "1d10" : "1d12")
             }),
-			action : ["reaction", ""], //optional; adds the name of this feature to the bonus action list when chosen. The options are "action", "bonus action", and "reaction"
 			savetxt : { // Optional; this attribute defines entries to add to the field for "Saving Throw Advantages / Disadvantages"
-				text : ["Unyielding Mind"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
+				text : ["Intellect Dice (Int, Wis, Cha)"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
 			},
-			usages : "Intelligence modifier",
-			usagescalc : "event.value = Math.max(1, What('Int Mod'));",
+			usages : "Intelligence + Wisdom modifier",
+			usagescalc : "event.value = Math.max(1, (What('Int Mod') + What('Wis Mod')));",
 			recovery : "short rest",
 		},
 
-        "expert student":{
-            name:"Expert Student",
+        "potent observation":{
+            name:"Potent Observation",
 			source : ["GMB:LL", 3],
 			minlevel : 2,
             description : desc([
-				"At the end of a long rest, I can choose to learn one language,",
-				"or one tool, skill, or weapon proficiency of my choice,",
-				"as long as there is an example on hand for myself to learn from.",
-				"I can gain only one per long rest(lvl 7:or short rest) up to Int mod(min 1).",
-				]),
-			usages : "Intelligence modifier",
-			usagescalc : "event.value = Math.max(1, What('Int Mod'));",
+				"When a creature I can see hits the target of my Adroit Analysis with an attack,",
+				"I can use my reaction to increase the damage dealt by the attack.",
+                ]),
+            additional : levels.map(function (n) {
+                return (n < 5 ? "1d4" : n < 10 ? "1d6" : n < 11 ? "1d8" : n < 15 ? "2d8": n < 20 ? "2d10" : "2d12")
+            }),
+            action : ["reaction",""]
         },
 
 		"subclassfeature3" : { //You need at least one entry named "subclassfeatureX". It signals the sheet to ask the user for which subclass he would like to have. The level of this feature should match the level the class needs to select a subclass. Once a subclass is selected, any feature with "subclassfeature" in the object name in the class entry will be ignored.
@@ -162,22 +161,25 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 			description : desc([
 				"I can take additional reaction(s) per round.",
 				"A single effect can only trigger one of my reactions.",
-				"When you roll initiative, you can take the Ready action, so long as you're not surprised"
+				"When you roll initiative, you can add your Intelligence Modifier, so long as you're not surprised"
 			]),
             additional: levels.map(function(n,idx) {
                 return [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2][idx]+" additional reactions";
             }),
         },
-        "potent observation":{
-            name:"Potent Observation",
+
+        "expert student":{
+            name:"Expert Student",
 			source : ["GMB:LL", 3],
 			minlevel : 5,
             description : desc([
-				"When I, or a creature that I can see, hits the target of my Adroit Analysis with an attack,",
-				"I can use my reaction to increase the damage dealt by the attack.",
-                ]),
-            additional : levels.map(function (n) {return (n < 11 ? "1d10 damage" : "2d10 damage")}),
-            action : ["reaction",""]
+				"At the end of a long rest, I can choose to learn one language,",
+				"one tool, skill, or weapon proficiency of my choice,",
+				"as long as there is an example on hand for myself to learn from.",
+				"I can gain only one per long rest (lvl 7:or short rest) up to Prof. bonus.",
+				]),
+			usages : "Proficiency Bonus",
+			usagescalc : "event.value = Math.max(1, What('Prof Bonus'));",
         },
 
 		"Keen Awareness":{
@@ -185,8 +187,8 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 			source : ["GMB:LL", 3],
 			minlevel : 7,
             description : desc([
-				"You can expend a use of Unyielding Mind and add it to an initiative roll",
-				"Cannot be surprised unless you are incapacitated"
+				"You cannot be surprised unless you are incapacitated",
+				"When you roll initiative, you can use Adroit Analysis"
 				])
 			//usages : "Intelligence modifier",
 			//usagescalc : "event.value = Math.max(1, What('Int Mod'));",
@@ -308,13 +310,14 @@ AddSubClass( // this is the function you will be calling to add the variant
 				source : ["GMB:LL", 4],
 				minlevel : 3,
 				description : desc([
-					"Gain a climbing speed equal to your movement speed.",
-					"Can use Unyielding Mind for Dexterity checks and saving throws.",
-					"Can expend a use of Expert Student to attune to a magic item that you don't meet the requirements for.",
+					"Gain proficiency with improvised weapons",
+					"Gain a climbing speed equal to your walking speed.",
+					"Can use Intellect Dice for Dexterity checks and saving throws.",
+					"Can expend a use of Expert Student to ignore class, race or alignment restrictions to attune to a magic item.",
 					"Can use a bonus action on your turn to use a magic item that normally takes an action."
 				]),
 				savetxt : { // Optional; this attribute defines entries to add to the field for "Saving Throw Advantages / Disadvantages"
-				text : ["Unyielding Mind(Dex)"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
+				text : ["Intellect Dice(Dex)"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
 				},
 			},
 
@@ -335,21 +338,22 @@ AddSubClass( // this is the function you will be calling to add the variant
 				minlevel : 13,
 				description : desc([
 					"If you observe a place, person or object for at least one hour,",
-					"you can recall information about it as if you had cast the legend lore spell,",
+					"you can recall information about it as if you had cast the Legend Lore spell,",
 					"The target does not need to be legendary for this.",
 					"Starting at 17th level, you only need to observe for 1 minute."
-				]),
-				usages : 1,
-				recovery : "short rest",
+				])
 			},
 			"subclassfeature17" : {
 				name : "Master Archaeologist",
 				source : ["GMB:LL", 4],
 				minlevel : 17,
 				description : desc([
-					"You are resistant to damage from spells, magic traps, and other magical effects."
+					"You are resistant to damage from spells and magical effects.",
+					"Once per day when you finish a short rest, you can cause one magic item to regain all of its expended charges that it would normally regain at the end of a long rest"
 				]),
-				dmgres : ["spells","magical effects"]
+				dmgres : ["spells","magical effects"],
+				usages: 1,
+				
 			},
 		}
 	}
