@@ -166,6 +166,7 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
             additional: levels.map(function(n,idx) {
                 return [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2][idx]+" additional reactions";
             }),
+			addMod: [{type:"skill", field:"Init", mod:"Int", text:"I can add my Intelligence modifier to initiative rolls, as long as I'm not surprised"}]
         },
 
         "expert student":{
@@ -179,7 +180,7 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 				"I can gain only one per long rest (lvl 7:or short rest) up to Prof. bonus.",
 				]),
 			usages : "Proficiency Bonus",
-			usagescalc : "event.value = Math.max(1, What('Prof Bonus'));",
+			usagescalc : "event.value = Math.max(1, How('Proficiency Bonus'));",
         },
 
 		"Keen Awareness":{
