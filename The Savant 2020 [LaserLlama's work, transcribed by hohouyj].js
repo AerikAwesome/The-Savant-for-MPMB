@@ -15,7 +15,7 @@
 	Sheet:		v13.00.00 (2018-??-??) [identical to v12.999 syntax, except v12.999 uses 'borrow' for the burrow speed]
 */
 
-var iFileName = "The Savant 4.4.1 [LaserLlama's work, transcribed by hohouyj, updated by Aerik].js"; // Optional; This is how the file will be named in the sheet if you import it as a file and not copy-paste its content. Only the first occurrence of this variable will be used
+var iFileName = "The Savant 4.7.1 [LaserLlama's work, transcribed by hohouyj, updated by Aerik].js"; // Optional; This is how the file will be named in the sheet if you import it as a file and not copy-paste its content. Only the first occurrence of this variable will be used
 RequiredSheetVersion(12.999); // Optional; This is the minimum required version number of the sheet for the script to work. If the sheet being used to import the script is of an earlier version, the user will be warned
 
 ClassList["savant"] = { //Object name; Note the use of only lower case! Also note the absence of the word "var" and the use of brackets []
@@ -50,12 +50,12 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 	],
 
 	weapons : [ //required; the 3 entries are for: ["simple", "martial", "other"]
-		[true, false, ["hand crossbow", "scimitar", "shortsword", "rapiers", "whips"]], //required; the weapon proficiencies if this is the first or only class
+		[true, false, ["shortsword"]], //required; the weapon proficiencies if this is the first or only class
 		[false, false, []] //required; the weapon proficiencies if this class is multiclassed with (so not taken at level 1, but later)
 	],
 
 	equipment : "Savant starting equipment:"+
-		"\n \u2022two simple weapons -or- a shortsword;"+
+		"\n \u2022a simple weapon -or- a shortsword;"+
 		"\n \u2022a light crossbow and 20 bolts -or- two daggers;"+
 		"\n \u2022one set of artisan's tools of your choice;"+
 		"\n \u2022leather armor and a scholar's pack."+ //required; the text to display when citing the starting equipment
@@ -75,12 +75,13 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 			source : ["GMB:LL", 2], //required; the source of the class feature
 			minlevel : 1, //required; the level at which the feature is gained
             description : desc([
-				"Bonus action ability check using any Int or Wis-based skill which I am proficient in.",
 				"Bonus action mark a creature I can see within 60ft",
-				"can use Int for attack and damage against marked creature.",
+				"Concentrate on Mark as if concentrating on a spell (Int save)",
+				"Advantage on ability check using any Int or Wis-based skill to analyze or recall",
+				"I can use Int for weapon attack and damage against marked creature.",
 				"If hit or spend 1 minute learn one of the following characteristics of your choice:",
-				"its AC, max hp, movement speed, one ability score, or creature type.",
-				"This mark lasts for 1 minute. It ends if I mark another creature."
+				"its AC, max hp, movement speed, or creature type.",
+				"This mark lasts indefinitely. It ends if I mark another creature, if the creature is Hidden, or I lose concentration."
 
             ]), //required; the text to put in the "Class Features" field
 			action : ["bonus action", ""],
@@ -94,66 +95,126 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 				]
 			}
 		},
-
-		"unarmored defense" : {
-			name : "Unarmored Defense",
-			source : ["GMB:LL", 2],
-			minlevel : 1,
-			description : "\n   " + "While not wearing armor and not wielding a shield,\n   my Armor Class is equal to 10 + Dexterity modifier + Intelligence modifier.",
-			addarmor : "Unarmored Defense (Int)", //optional; a string of the name of the armour that is literally put in the Armor Description field when the class feature is applicable, and removed if not
-		},
-
-		"perfect recall" : {
-			name : "Perfect Recall",
+		"predictive defense" : {
+			name : "Predictive Defense",
 			source : ["GMB:LL", 2],
 			minlevel : 1,
 			description : desc([
-				"If I spend at least 1 minute observing and committing something to memory,",
-				"I can recall any information about my observations without an ability check."
-            ]),
+				"I can use Int instead of Dex when calculating AC.",
+				"As long as I am not incapacitated, my Mark has disadvantage on any attack roll against me"	
+			]),
+			extraAC : {
+				mod: "Int-Dex",
+				name: "Predictive Defense",
+				text: "I can use Int instead of Dex when calculating AC."
+			}
 		},
-
-		"intellect dice" : {
-			name : "Intellect Dice",
+		"scholarly pursuits" : {
+			name : "Scholarly Pursuits",
+			source : ["GMB:LL", 2],
+			minlevel : 2,
+			description : desc([
+				'Use the "Choose Feature" button above to add Scholarly Pursuits to the sheet'
+            ]),
+			additional: levels.map(function (n) {
+				return n < 2 ? "" : (n < 4 ? 2 : (n < 8 ? 3 : (n < 12 ? 4 : (n < 16 ? 5 : 6)))) + " pursuits followed"
+			}),
+			extraname: "Scholarly Pursuit",
+			extrachoices: ["//TODO"],
+			extraTimes: levels.map(function (n) {
+				return n < 2 ? "" : (n < 4 ? 2 : (n < 8 ? 3 : (n < 12 ? 4 : (n < 16 ? 5 : 6))))
+			}),
+			"astrology":{
+				name: "Astrology",
+				description: desc([
+					"During a long rest when I can see the night sky, roll 1d20.",
+					"Record the number rolled. You can replace any attack roll, saving throw, or ability check with this number.",
+					"You must use this feature before you roll. The number can only be used once, and is lost at the next long rest."
+			])
+			},
+			"falconry":{
+				name: "Falconry",
+				description: desc([
+					"You gain a Falcon companion which uses the Hawk statblock, but with an Int of 8.",
+					"You can communicate simple ideas with your Falcon using simple gestures and sounds.",
+					"In combat it shares your initiative and acts on your turn. It can move and use its reaction on its own.",
+					"It only takes the Dodge action unless you use a bonus action to command it to take another action.",
+					"If you're incapacitated, your Falcon acts on its own. If your falcon falls to 0 hit points it makes death saving throws as a player would.",
+					"Should your Falcon die, you can track and train another Falcon over 8 hours using 5gp worth of bait."
+				]),
+				//TODO: Add falcon companion page
+			},
+			"fencing":{
+				name: "Fencing",
+				description: desc([
+					"You gain proficiency with long swords, rapiers, and scimitars.",
+					"When a creature you can see targets you with a melee attack while you are wielding one of these weapons, you can use your reaction to roll your Intellect Dice and add its result to your AC against the attack.",
+					"If the attack misses, you can make one melee weapon attack against the attacker as part of the same reaction."
+				]),
+				//TODO: Add reaction
+			},
+			"marksmanship":{
+				name: "Marksmanship",
+				description: desc([
+					"You gain proficiency with all martial ranged weapons.",
+					"When you make a ranged weapon attack, you can use your Intellect Die in place of the weapon's damage die.",
+					"Moreover, if your setting includes firearms, and your savant has been exposed to the inner workings of such devices, they are considered to be proficient with all firearms."
+				]),
+				//TODO add proficiencies
+			},
+			"linguistics":{
+				name: "Linguistics",
+				description: desc([
+					"You learn to speak, read, and write a number of languages equal to your Intelligence modifier.",
+					"Whenever you make a Persuasion check while speaking with a creature in its native tongue (not Common) you can treat a roll of 9 or lower on the d20 as a 10."
+				]),
+				//TODO add languages
+			},
+			"perfect recall":{
+				name: "Perfect Recall",
+				description: desc(["todo"])
+			},
+			"riddles":{
+				name: "Riddles",
+				description: desc(["todo"])
+			},
+			"secrets & whispers":{
+				name: "Secrets & Whispers",
+				description: desc(["todo"])
+			},
+			"skill mastery":{
+				name: "Skill Mastery",
+				description: desc(["todo"])
+			},
+			"traditions":{
+				name: "Traditions",
+				description: desc(["todo"])
+			}
+		},
+		"wondrous intellect" : {
+			name : "Wondrous Intellect",
 			source : ["GMB:LL", 2],
 			minlevel : 2,
             description : desc([
-				"When I make an Intelligence, Wisdom, or Charisma check or saving throw,",
-				"I can roll a bonus die and add it to the result.",
-				"Use this feature after you roll, but before you know whether you succeed or fail."
+				"When I make an Intelligence or Wisdom ability check or saving throw, or a damage roll against my Mark",
+				"I can roll my Intellect Die and add it to the result.",
+				"When a creature that can see or hear you hits your Mark with an attack, I can use my reaction to grant it a bonus to damage equal to my Intellect Die",
+				"At certain levels, my Intellect Die increases:"
                 ]),
             additional : levels.map(function (n) {
-                return (n < 5 ? "1d4" : n < 10 ? "1d6" : n < 15 ? "1d8": n < 20 ? "1d10" : "1d12")
+                return (n < 5 ? "1d6" : n < 10 ? "1d8" : n < 15 ? "1d10": "1d12")
             }),
 			savetxt : { // Optional; this attribute defines entries to add to the field for "Saving Throw Advantages / Disadvantages"
-				text : ["Intellect Dice (Int, Wis, Cha)"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
+				text : ["Intellect Dice (Int, Wis)"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
 			},
-			usages : "Intelligence + Wisdom modifier",
-			usagescalc : "event.value = Math.max(1, (What('Int Mod') + What('Wis Mod')));",
-			recovery : "short rest",
+			action: ["reaction", ""]
 		},
-
-        "potent observation":{
-            name:"Potent Observation",
-			source : ["GMB:LL", 3],
-			minlevel : 2,
-            description : desc([
-				"When a creature I can see hits the target of my Adroit Analysis with an attack,",
-				"I can use my reaction to increase the damage dealt by the attack.",
-                ]),
-            additional : levels.map(function (n) {
-                return (n < 5 ? "1d4" : n < 10 ? "1d6" : n < 11 ? "1d8" : n < 15 ? "2d8": n < 20 ? "2d10" : "2d12")
-            }),
-            action : ["reaction",""]
-        },
-
 		"subclassfeature3" : { //You need at least one entry named "subclassfeatureX". It signals the sheet to ask the user for which subclass he would like to have. The level of this feature should match the level the class needs to select a subclass. Once a subclass is selected, any feature with "subclassfeature" in the object name in the class entry will be ignored.
 			name : "Academic Discipline",
 			source : ["GMB:LL", 2],
 			minlevel : 3,
 			description : "\n   " + "choose your Academic Discipline and put it in the \"Class\" field" + "\n   " + "Choose between Archaeologist, Investigator, Naturalist, Physician, or Tactician",
 		},
-
 		"accelerated reflexes" : {
 			name : "Accelerated Reflexes",
 			source : ["GMB:LL", 3],
@@ -161,16 +222,15 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 			description : desc([
 				"I can take additional reaction(s) per round.",
 				"A single effect can only trigger one of my reactions.",
-				"When you roll initiative, you can add your Intelligence Modifier, so long as you're not surprised"
+				"When you roll initiative, you can add your Intelligence Modifier"
 			]),
             additional: levels.map(function(n,idx) {
                 return [0,0,0,0,1,1,1,1,1,1,1,1,1,1,1,1,2,2,2,2][idx]+" additional reactions";
             }),
 			addMod: [{type:"skill", field:"Init", mod:"Int", text:"I can add my Intelligence modifier to initiative rolls, as long as I'm not surprised"}]
         },
-
-        "expert student":{
-            name:"Expert Student",
+        "quick study":{
+            name:"Quick Study",
 			source : ["GMB:LL", 3],
 			minlevel : 5,
             description : desc([
@@ -178,110 +238,102 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 				"one tool, skill, or weapon proficiency of my choice,",
 				"as long as there is an example on hand for myself to learn from.",
 				"I can gain only one per long rest (lvl 7:or short rest) up to Prof. bonus.",
-				]),
-			usages : "Proficiency Bonus",
-			usagescalc : "event.value = Math.max(1, How('Proficiency Bonus'));",
+				])
         },
-
 		"Keen Awareness":{
             name:"Keen Awareness",
 			source : ["GMB:LL", 3],
 			minlevel : 7,
             description : desc([
 				"You cannot be surprised unless you are incapacitated",
-				"When you roll initiative, you can use Adroit Analysis"
+				"When you roll initiative, you can use a reaction to do one of the following before any other creatures act:",
+				"- Use Adroit Analysis to Mark a creature I can see",
+				"- Make an Intelligence ability check to recall information",
+				"- Take either the Help, Ready or Search action"
 				])
-			//usages : "Intelligence modifier",
-			//usagescalc : "event.value = Math.max(1, What('Int Mod'));",
         },
-
-        "expert educator":{
-            name:"Expert Educator",
+        "flash of brilliance":{
+            name:"Flash of Brilliance",
 			source : ["GMB:LL", 3],
 			minlevel : 9,
             description : desc([
-				"After a long rest, choose one skill, tool, or weapon proficiency or language I know.",
-				"A number of creatures equal to my Int mod(min 1) that can hear me gain it.",
-				"This benefit lasts until the end of my next long rest.",
+				"As a reaction when a creature that can hear me within 30 feet makes a saving throw,",
+				"I can grant it a bonus to its roll equal to one roll of my Intellect Die"
 				]),
-			usages : "Intelligence modifier",
-			usagescalc : "event.value = Math.max(1, What('Int Mod'));",
+			action: ["reaction",""]
 		},
-        "flawless observation":{
-            name:"Flawless Observation",
+		"predictive expert":{
+			name:"Predictive Expert",
+			source : ["GMB:LL", 3],
+			minlevel: 10,
+			description: desc([
+				"As long as I am not incapacitated, I have advantage on any ability checks or saving throws my Mark forces me to make."
+			])
+		},
+        "potent observation":{
+            name:"Potent Observation",
 			source : ["GMB:LL", 3],
 			minlevel : 11,
             description : desc([
-				"Can use Potent Observation even if the target is not marked by my Adroit Analysis.",
-				"Potent Observation against marked creatures also gains bonus damage equal to my Int mod(min 1)."
+				"I can use a reaction to add a roll of my Intellect Die to any damage roll,",
+				"as long as I can see the target and the attacker can hear me.",
+				"Also, whenever I use my reaction to add my Intellect Die to to a damage roll against my Mark, I can roll the Intellect die twice and use the higher result."
                 ]),
 			additional : ["Intelligence modifier bonus damage"],
-			eval : "RemoveAction(\"reaction\", \"Potent Observation\"); AddAction(\"reaction\", \"Flawless Observation\", \"Savant\")", //eval is custom code that is run when the feature is added. It is used here, because the "Second Wind" bonus action is removed, and replaced by the "Second Wind (+ Rallying Cry)" bonus action. If you instead just want to add a bonus action for "Rallying Cry", use the action object (i.e. action : ["bonus action", ""],)
-			removeeval : "RemoveAction(\"reaction\", \"Flawless Observation\"); AddAction(\"reaction\", \"Potent Observation\", \"Savant\")", //removeeval is custom code that is run when the feature is removed. Here the "Second Wind (+ Rallying Cry)" bonus action is removed and replaced by the plain "Second Wind" bonus action
+			eval : "AddAction(\"reaction\", \"Potent Observation\", \"Savant\");", //eval is custom code that is run when the feature is added. It is used here, because the "Second Wind" bonus action is removed, and replaced by the "Second Wind (+ Rallying Cry)" bonus action. If you instead just want to add a bonus action for "Rallying Cry", use the action object (i.e. action : ["bonus action", ""],)
+			removeeval : "RemoveAction(\"reaction\", \"Potent Observation\");", //removeeval is custom code that is run when the feature is removed. Here the "Second Wind (+ Rallying Cry)" bonus action is removed and replaced by the plain "Second Wind" bonus action
         },
         "unyielding will":{
             name:"Unyielding Will",
 			source : ["GMB:LL", 3],
 			minlevel : 14,
             description : desc([
-				"If I fail a saving throw against being charmed, frightened, or stunned,",
-				"I can choose to expend a use of unyielding mind to succeed instead.",
+				"I gain proficiency in Charisma saving throws.",
+				"Whenever I am forced to make a Charisma saving throw I gain a bonus equal to a roll of an Intellect Die",
+				"When an effect allows me to make an Int, Wis or Cha saving throw to avoid damage, I take no damage on a success and half on failure.",
                 ]),
-            //usages : 1, //optional; number of times it can be used. This can be one value, but can also be an array of 20 values, one for each level. It is recommended to use a numerical value, but if you use a string, include " per " at the end, like "1d10 per "
-			//recovery : "short rest",
             savetxt : { // Optional; this attribute defines entries to add to the field for "Saving Throw Advantages / Disadvantages"
 				text : ["Unyielding Will"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
 			},
+			saves: ["Cha"]
         },
         "profound insight":{
             name:"Profound Insight",
 			source : ["GMB:LL", 3],
 			minlevel : 18,
             description : desc([
-				"The target of my Adroit Analysis has disadvantage on any attack targeting me,",
-				"and I have advantage on any saving throws it forces me to make."
-                ])
+				"As an action, I can predict my Mark's next move. Until the start of my next turn,",
+				"my Mark has disadvantage on all ability checks, attack rolls, and saving throws,",
+				"and creatures of my choice have advantage on any saving throw my Mark forces them to make."
+                ]),
+			usages: 1,
+			recovery: "short rest",
+			action: ["action",""]
         },
         "undisputed genius":{
             name:"Undisputed Genius",
 			source : ["GMB:LL", 3],
 			minlevel : 20,
             description : desc([
-                "My Intelligence and Wisdom scores increase by 4. My maximum for those scores is now 24."
+                "My Intelligence scoreincrease by 4. My maximum for this score is now 24.",
+				"Also, when you roll an Intellect Die and roll lower than your Int modifier, you can replace the roll with your Int modifier"
 				]),
-			scores : [0,0,0,4,4,0],
-			scoresMaximum : [0,0,0,24,24,0]
-        },
-		
+			scores : [0,0,0,4,0,0],
+			scoresMaximum : [0,0,0,24,0,0]
+        },		
 	}
 }
 
-AddSubClass( // this is the function you will be calling to add the variant
-
-	"savant", // Parent Class object name; Required; This has to be the exact name of the class of which you are adding a subclass. Look for the name of the class in the ClassList variable. For the default 12 classes these names are: "barbarian", "bard", "cleric", "druid", "fighter", "monk", "paladin", "ranger", "rogue", "sorcerer", "warlock", and "wizard"
-
-	"archaeologist", // Object name; Required; The name the entry in the ClassSubList will have. This can be anything, it is just something that the sheet uses to reference the new entry and it will never be printed anywhere
-
-	{ // don't forget this opening bracket
-
-		regExpSearch : /^(?=.*archaeologist).*$/i, //required; regular expression of what to look for (i.e. now it looks for any entry that has both the words "special" and "me" in it, disregarding capitalization). If this looks too complicated, just write: /specialme/i
-
-		subname : "Archaeologist", //required; the name of the subclass
-
-		source : ["GMB:ll", 4], //required; the source and the page number. "HB" stands for homebrew. See the "Complete SourceList" for an overview of sources that are already defined. Or define a new source using the "Homebrew Syntax - SourceList.js". // This can be an array of arrays to indicate the things appears in multiple sources. For example, if something appears on page 7 of the Elemental Evil Player's Companion and on page 115 of the Sword Coast Adventure Guide, use the following: [["E", 7], ["S", 115]]
-
-		// after defining the above three, you don't need to define anything more, but you can. Defining more stuff will overwrite the entries as they are given in the ClassList. So if you do not need something to be different than the basics of the class (for example, you subclass uses the same spellcasting ability), then you don't need to define it again.
-		// For the syntax of how to define more stuff, look at the ClassList (see "Homebrew Syntax - ClassList.js"). You can define all the same stuff in the same way. The below are a couple of examples:
-
-		fullname : "Archaeologist", //if no fullname is defined it will be automatically generated as "Class Name (Subclass name)". In this example that would be: "MyClass (Path of SpecialMe)"
-
-		// abilitySave : 6, //overwrites the abilitySave that was defined in the ClassList
-		// abilitySaveAlt : 2,//overwrites the abilitySaveAlt that was defined in the ClassList
-		// spellcastingFactor : 2, //overwrites the spellcastingFactor that was defined in the ClassList
-
-		features : { //unlike the other entries, "features" will not delete all the features from the ClassList, but will add to the features in the ClassList. For this to work properly, the feature object has to be named "subclassfeatureX" and not something appropriate for the feature. The below are the features of the purple Dragon Knight
-
-			"subclassfeature3" : { // has to start with "subclassfeature" followed by a number. Note that the name has to be unique for this subclass, but it can be the same name as one of the features of the class in the ClassList variable. If you use the same name as a feature in the ClassList variable, it will be overwritten with this entry
+AddSubClass(
+	"savant",
+	"archaeologist",
+	{
+		regExpSearch : /^(?=.*archaeologist).*$/i,
+		subname : "Archaeologist",
+		source : ["GMB:ll", 4],
+		fullname : "Archaeologist",
+		features : {
+			"subclassfeature3" : {
 				name : "Student of History",
 				source : ["GMB:LL", 4],
 				minlevel : 3,
@@ -311,15 +363,13 @@ AddSubClass( // this is the function you will be calling to add the variant
 				source : ["GMB:LL", 4],
 				minlevel : 3,
 				description : desc([
-					"Gain proficiency with improvised weapons",
 					"Gain a climbing speed equal to your walking speed.",
-					"Can use Intellect Dice for Dexterity checks and saving throws.",
-					"Can expend a use of Expert Student to ignore class, race or alignment restrictions to attune to a magic item.",
-					"Can use a bonus action on your turn to use a magic item that normally takes an action."
+					"I ignore class, race or alignment restrictions to attune to a magic item, and count as a spellcaster using Int for this purpose.",
+					"Whenever I use my action to Use an Object, scroll, potion, or magic item, I can make one attack as a bonus action."
 				]),
-				savetxt : { // Optional; this attribute defines entries to add to the field for "Saving Throw Advantages / Disadvantages"
-				text : ["Intellect Dice(Dex)"], // Optional; this is an array of strings, and each of those strings is added to the field exactly as presented here
-				},
+				speed:{
+					climb:{spd:"walk", enc:"walk"}
+				}
 			},
 
 			"subclassfeature6" : {
@@ -327,8 +377,7 @@ AddSubClass( // this is the function you will be calling to add the variant
 				source : ["GMB:LL", 4],
 				minlevel : 6,
 				description : desc([
-					"My Adroit Analysis target cannot make opportunity attacks against me.",
-					"When targeted with an opportunity attack, I can use my reaction to impose disadvantage.",
+					"My Wondrous Intellect bonus applies to Dexterity ability checks and saving throws.",
 					"My saves vs. traps have a bonus equal to my Int mod, negate damage on success and halve it on failure"
 				]),
 				savetxt : { text : ["save vs. traps: +int, fail \u2015 half dmg, success \u2015 no dmg"] }
@@ -340,8 +389,8 @@ AddSubClass( // this is the function you will be calling to add the variant
 				description : desc([
 					"If you observe a place, person or object for at least one hour,",
 					"you can recall information about it as if you had cast the Legend Lore spell,",
-					"The target does not need to be legendary for this.",
-					"Starting at 17th level, you only need to observe for 1 minute."
+					"The target does not need to be legendary for this, though if there is no lore you learn nothing.",
+					"When you use a magic item, its save DC iq equal to 8 + your prof. bonus + your Int modifier:"
 				])
 			},
 			"subclassfeature17" : {
@@ -349,12 +398,12 @@ AddSubClass( // this is the function you will be calling to add the variant
 				source : ["GMB:LL", 4],
 				minlevel : 17,
 				description : desc([
-					"You are resistant to damage from spells and magical effects.",
-					"Once per day when you finish a short rest, you can cause one magic item to regain all of its expended charges that it would normally regain at the end of a long rest"
+					"You are resistant to damage from spells.",
+					"Once per day when you finish a short rest, you can cause one magic item to regain expended charges equal to your Intelligence modifier."
 				]),
 				dmgres : ["spells","magical effects"],
 				usages: 1,
-				
+				recovery: "short rest"
 			},
 		}
 	}
