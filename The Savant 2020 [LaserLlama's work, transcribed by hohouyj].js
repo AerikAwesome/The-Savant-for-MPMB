@@ -216,7 +216,8 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 				calcChanges: {
 					atkAdd: [
 						function (fields, v){
-							if (classes.known.savant && classes.known.monk.level && ["whip", "scimitar", "sickle", "shovel", "pickaxe"].includes(v.baseWeaponName)){
+							if (classes.known.savant && classes.known.savant.level && 
+								(v.baseWeaponName == "whip" || v.baseWeaponName == "scimitar" || v.baseWeaponName == "sickle" || v.baseWeaponName == "shovel" || v.baseWeaponName == "pickaxe")){
 								var intDie = function (level){ 
 									return level < 5 ? 6 : level < 10 ? 8 : level < 15 ? 10 : 12; 
 								}(classes.known.savant.level);
