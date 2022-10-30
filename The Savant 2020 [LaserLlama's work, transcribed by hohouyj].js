@@ -120,7 +120,9 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 				return n < 2 ? "" : (n < 4 ? 2 : (n < 8 ? 3 : (n < 12 ? 4 : (n < 16 ? 5 : 6)))) + " pursuits followed"
 			}),
 			extraname: "Scholarly Pursuit",
-			extrachoices: ["//TODO"],
+			extrachoices: [
+				"astrology", "falconry", "fencing", "marksmanship", "linguistics", "perfect recall", 
+				"riddles", "secrets & whispers", "skill mastery", "traditions", "dungeoneering", "delving"],
 			extraTimes: levels.map(function (n) {
 				return n < 2 ? "" : (n < 4 ? 2 : (n < 8 ? 3 : (n < 12 ? 4 : (n < 16 ? 5 : 6))))
 			}),
@@ -172,7 +174,11 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 			},
 			"perfect recall":{
 				name: "Perfect Recall",
-				description: desc(["todo"])
+				description: desc([
+					"If you spend at least 1 minute observing an object or creature,",
+					"you can perfectly recall any observable information about that creature or object point in the future,",
+					"without requiring a successful Intelligence check."
+				])
 			},
 			"riddles":{
 				name: "Riddles",
@@ -189,6 +195,42 @@ ClassList["savant"] = { //Object name; Note the use of only lower case! Also not
 			"traditions":{
 				name: "Traditions",
 				description: desc(["todo"])
+			},
+			"delving":{
+				name: "Delving",
+				description: desc([
+					"You have spent a great deal of time in archaeological digs.",
+					"You gain proficiency with War Picks and Warhammers.",
+					"You gain the ability to quickly dig holes and tunnels, moving a 5-foot cube of soil in 1 minute or rock in 10 minutes"
+				]),
+				weaponProfs: [false, false, ["war pick", "warhammer"]]
+			},
+			"dungeoneering":{
+				name: "Dungeoneering",
+				description: desc([
+					"You gain proficiency with Whips, Scimitars, Sickles, and improvised weapons from tools (shovel, pickaxe).",
+					"When using one of the above weapons, you may use your Intellect Die instead of the weapons normal damage die.",
+					"Additionally, you gain advantage on checks made to disarm traps."
+				]),
+				weaponProfs: [false, false, ["whip", "scimitar", "sickle", "shovel", "pickaxe"]],
+				calcChanges: {
+					atkAdd: [
+						function (fields, v){
+							if (classes.known.savant && classes.known.monk.level && ["whip", "scimitar", "sickle", "shovel", "pickaxe"].includes(v.baseWeaponName)){
+								var intDie = function (level){ 
+									return level < 5 ? 6 : level < 10 ? 8 : level < 15 ? 10 : 12; 
+								}(classes.known.savant.level);
+								try{ var curDie = eval_ish(fields.Damage_Die.replace('d', '*'));}
+								catch(e){var curDie = 'x';}
+
+								if (isNaN(curDie) || curDie < intDie) {
+									fields.Damage_Die = '1d' + intDie
+								};
+							}
+							
+						}
+					]
+				}
 			}
 		},
 		"wondrous intellect" : {
